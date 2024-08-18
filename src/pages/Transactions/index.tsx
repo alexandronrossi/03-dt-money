@@ -1,11 +1,13 @@
-import { Header } from '../../components/Header'
+import {} from './styles'
 
-import styles from './styles'
+import { Header } from '../../components/Header'
+import { Summary } from '../../components/Summary'
 
 export function Transactions() {
 	return (
 	  <div>
 		<Header />
+		<Summary />
 	  </div>
 	)
 }
