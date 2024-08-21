@@ -1,39 +1,88 @@
-import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { ArrowCircleDown, ArrowCircleUp, X } from 'phosphor-react';
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
+import { ArrowCircleDown, ArrowCircleUp, X } from "phosphor-react";
+import * as zod from 'zod';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { CancelButton, Content, Overlay, TransactionType, TransactionTypeButton } from './styles'
+import {
+	CancelButton,
+	Content,
+	Overlay,
+	TransactionType,
+	TransactionTypeButton,
+} from "./styles";
+
+const newTransactionFormSchema = zod.object({
+	description: zod.string(),
+	price: zod.number(),
+	category: zod.string(),
+	type: zod.enum(['income', 'outcome']),
+});
+
+type newTransactionFormInputs = zod.infer<typeof newTransactionFormSchema>;
 
 export function NewTransactionModal() {
-  return (
-	<AlertDialog.Portal>
-		<Overlay />
-		<Content>
-			<AlertDialog.Title>Nova Transação</AlertDialog.Title>
+	const {
+		register,
+		handleSubmit,
+		formState: { isSubmitting }
+	} = useForm<newTransactionFormInputs>({
+		resolver: zodResolver(newTransactionFormSchema),
+	});
 
-			<CancelButton>
-				<X size={24} />
-			</CancelButton>
+	async function handleCreateNewTransaction(data: newTransactionFormInputs) {
+		await new Promise(resolve => setTimeout(resolve, 2000))
+		console.log(data)
+	}
 
-			<form action="">
-				<input type="text" placeholder='Descrição' required />
-				<input type="number" placeholder='Preço' required />
-				<input type="text" placeholder='Categoria' required />
+	return (
+		<AlertDialog.Portal>
+			<Overlay />
+			<Content>
+				<AlertDialog.Title>Nova Transação</AlertDialog.Title>
 
-				<TransactionType>
-					<TransactionTypeButton variant='income' value='income'>
-						<ArrowCircleUp size={24} />
-						Entrada
-					</TransactionTypeButton>
+				<CancelButton>
+					<X size={24} />
+				</CancelButton>
 
-					<TransactionTypeButton variant='outcome' value='outcome'>
-						<ArrowCircleDown size={24} />
-						Saída
-					</TransactionTypeButton>
-				</TransactionType>
+				<form action="" onSubmit={handleSubmit(handleCreateNewTransaction)}>
+					<input 
+						type="text" 
+						placeholder="Descrição" 
+						required 
+						{...register('description')}
+					/>
+					<input 
+						type="number" 
+						placeholder="Preço" 
+						required 
+						{...register('price', { valueAsNumber: true })}
+					/>
+					<input 
+						type="text" 
+						placeholder="Categoria" 
+						required 
+						{...register('category')}
+					/>
 
-				<button type="submit">Cadastrar</button>
-			</form>
-		</Content>
-	</AlertDialog.Portal>
-  )
+					<TransactionType>
+						<TransactionTypeButton variant="income" value="income">
+							<ArrowCircleUp size={24} />
+							Entrada
+						</TransactionTypeButton>
+
+						<TransactionTypeButton
+							variant="outcome"
+							value="outcome"
+						>
+							<ArrowCircleDown size={24} />
+							Saída
+						</TransactionTypeButton>
+					</TransactionType>
+
+					<button type="submit" disabled={isSubmitting}>Cadastrar</button>
+				</form>
+			</Content>
+		</AlertDialog.Portal>
+	);
 }
